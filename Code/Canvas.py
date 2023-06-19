@@ -82,7 +82,7 @@ class Image(QtWidgets.QLabel):
 
     def refactor (self):
         if self.pages != {}:
-            print("refactor")
+            # print("refactor")
             if self.pagesRect == {}:
                 # print("copia todo")
                 # print(self.pages)

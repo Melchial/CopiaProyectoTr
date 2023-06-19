@@ -12,6 +12,8 @@ try:
     import translators.server as ts
 except ModuleNotFoundError:
     import translators as ts
+import RectangleManipulation as rm
+from PyQt5.QtCore  import QRect
 
 class MangaBag:
     
@@ -43,6 +45,7 @@ class MangaBag:
         return (font_scale, thickness)
     
     def get_japanese(self, image, mocr, diction, direct):
+        print (diction)
         if diction == {}:
             return {}
         newList = {}
@@ -51,7 +54,17 @@ class MangaBag:
         directory = direct
         tt = []
         for x in diction:
-            cropped_image = image[abs(diction[x][0][1]):abs(diction[x][1][1]), abs(diction[x][0][0]):abs(diction[x][1][0])]
+            rectP = diction[x]
+            print(type(rectP))
+            if isinstance(rectP, QRect):
+                rectF= rm.getQuadfromRect(rectP)
+            else:
+                rectF = rectP 
+            print(rectP)
+            print(rectF)
+            # cropped_image = image[abs(diction[x][0][1]):abs(diction[x][1][1]), abs(diction[x][0][0]):abs(diction[x][1][0])]
+            cropped_image = image[abs(rectF[0][1]):abs(rectF[1][1]), abs(rectF[0][0]):abs(rectF[1][0])]
+            # print(diction[x][0][1])
             try:
                 cv2.imwrite(os.path.join(directory, str(x)+'.jpg'), cropped_image)
             except:

@@ -1,6 +1,7 @@
 import math 
 from pprint import pprint
-        
+from PyQt5.QtCore import QRect   
+
 class Overlap:
     def __init__(self, x1, y1, x2, y2, id):
         self.x1 = x1
@@ -90,4 +91,10 @@ def rectanglesCO(newDt, s):
             newM[name] = Overlap(m[0][0], m[0][1], m[1][0], m[1][1], name)
     return newM
 
+def getQuadfromRect(qRect):
+    left = QRect(qRect).left()
+    right = QRect(qRect).right()
+    top = QRect(qRect).top()
+    bottom = QRect(qRect).bottom()
 
+    return((left,top),(right,bottom))

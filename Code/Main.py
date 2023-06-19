@@ -16,7 +16,9 @@ from Configer import Settings
 
 from TransalateNew import TranslateNew
 
-# from manga_ocr import MangaOcr
+from ExtText import ExtractOriginal
+
+from manga_ocr import MangaOcr
 
 class interact(QtWidgets.QMainWindow, Ui_MainWindow):
     active = pyqtSignal()
@@ -38,6 +40,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         self.translatedFiles = []
         self.files = []
         self.textPosi = {}
+        self.textOri = {}
         self.isClicked = False
         self.shownSetting = False
         self.bar.setValue(0)
@@ -57,7 +60,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         self.single = False
         
         
-        self.ocr = [] #MangaOcr()
+        self.ocr = MangaOcr()
         self.orgLanguage = None
         self.clearButton.hide()
         self.saveButton.hide()
@@ -128,8 +131,9 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         self.translate.clicked.connect(self.translate1)
         self.translate.clicked.connect(self.showProgress)
 
-        self.newtrans1.clicked.connect(self.nTrans1)
-        self.newtrans2.clicked.connect(self.showdataTests)
+        self.newtrans1.clicked.connect(self.extractTextPos)
+        self.newtrans2.clicked.connect(self.extractTextOri)
+        self.newtrans3.clicked.connect(self.showdataTests)
         # self.newtrans3.clicked.connect(self.showdataTests)
 
         self.pushButton_5.clicked.connect(self.showSet)
@@ -736,14 +740,16 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         #     print(type(f))
         #     print(f)
         print(self.im.pages)  
-        print(self.im.pagesRect) 
+        print(self.textOri) 
 
     #almacenamos los datos de la posicion del texto
     def positionText(self,textpos):
         self.im.pages = textpos
         # self.textPosi=textpos
         # a=1
-
+    
+    def textoOriginal(self, textOr ):
+        self.textOri = textOr
 
     def translate1(self):
         self.clearButton.hide()
@@ -789,17 +795,30 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
             self.worker.signals.lang.connect(self.orgLang)
             self.thread.start(self.worker)
 
-    def nTrans1(self):
+    def extractTextPos(self):
         self.clearButton.hide()
         if self.files == []:
             pass
         else:
-             logger.info("New Translation")
+             logger.info("Find Text Position")
              self.changeToManual()
              self.worker = TranslateNew(self.files,self.ocr,self.combineN,self.combineO,self.range)
              self.worker.signals.result.connect(self.afterThread)
              self.worker.signals.textPos.connect(self.positionText)
-            
+                      
+             self.thread.start(self.worker)
+
+    def extractTextOri(self):
+        self.clearButton.hide()
+        if self.files == []:
+            pass
+        else:
+             logger.info("Find Text Ori")
+             self.changeToManual()
+             self.worker = ExtractOriginal(self.files,self.ocr,self.im.pages,self.originalLang)
+             self.worker.signals.result.connect(self.afterThread)
+             self.worker.signals.textOriginal.connect(self.textoOriginal)
+                      
              self.thread.start(self.worker)
 
 if __name__ == "__main__":
