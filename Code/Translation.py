@@ -55,13 +55,13 @@ class MangaBag:
         tt = []
         for x in diction:
             rectP = diction[x]
-            print(type(rectP))
+            # print(type(rectP))
             if isinstance(rectP, QRect):
                 rectF= rm.getQuadfromRect(rectP)
             else:
                 rectF = rectP 
-            print(rectP)
-            print(rectF)
+            # print(rectP)
+            # print(rectF)
             # cropped_image = image[abs(diction[x][0][1]):abs(diction[x][1][1]), abs(diction[x][0][0]):abs(diction[x][1][0])]
             cropped_image = image[abs(rectF[0][1]):abs(rectF[1][1]), abs(rectF[0][0]):abs(rectF[1][0])]
             # print(diction[x][0][1])

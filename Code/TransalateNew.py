@@ -64,30 +64,32 @@ class TranslateNew(QRunnable):
         backup = []
         finalRecpos ={}
         try:
-            # for x in self.imag1:
+            for x in self.imag1:
                 
-            #     fontSize, thickness = self.manga.getFontSizeThickness(x)
-            #     self.img1 = cv2.imread(r"{}".format(x))
-            #     self.image = cv2.cvtColor(self.img1, cv2.COLOR_BGR2RGB)
-            #     gotten_text = self.LocateText(self.image)
-            #     # pprint(gotten_text)
-            #     # print(type(gotten_text))
-            #     # print(gotten_text)
-            #     # print(type(x))
-            #     # print(x)
-            #     finalsq = {}
-            #     for i in gotten_text:
-            #         x1 = QPoint(gotten_text[i][0][0],gotten_text[i][0][1])
-            #         y1 = QPoint(gotten_text[i][1][0],gotten_text[i][1][1])
-            #         finalsq[i]=QRect(x1,y1).normalized()
-            #     finalRecpos[x]=finalsq
-            finalRecpos={'C:/Users/zeraf/Documents/ProjectMangaTr/CopiaProyectoTr/007.jpg': 
-                         {'0': QRect(1486, 423, 130, 407), '1': QRect(1162, 1436, 721, 382),
-                           '3': QRect(335, 2066, 52, 216), '4': QRect(660, 2007, 186, 414), 
-                           '5': QRect(974, 2018, 73, 176), '6': QRect(1029, 2012, 125, 361),
-                            '7': QRect(1558, 1925, 122, 315), '9': QRect(1726, 2273, 112, 454), 
-                            '10': QRect(1145, 2664, 50, 30), '11': QRect(1181,663, 80, 164),
-                             '12': QRect(906, 2564, 46, 94)}}    
+                fontSize, thickness = self.manga.getFontSizeThickness(x)
+                self.img1 = cv2.imread(r"{}".format(x))
+                self.image = cv2.cvtColor(self.img1, cv2.COLOR_BGR2RGB)
+                gotten_text = self.LocateText(self.image)
+                # pprint(gotten_text)
+                # print(type(gotten_text))
+                # print(gotten_text)
+                # print(type(x))
+                # print(x)
+                finalsq = {}
+                for i in gotten_text:
+                    x1 = QPoint(gotten_text[i][0][0],gotten_text[i][0][1])
+                    y1 = QPoint(gotten_text[i][1][0],gotten_text[i][1][1])
+                    finalsq[i]=QRect(x1,y1).normalized()
+                finalRecpos[x]=finalsq
+
+            # finalRecpos={'C:/Users/zeraf/Documents/ProjectMangaTr/CopiaProyectoTr/007.jpg': 
+            #              {'0': QRect(1486, 423, 130, 407), '1': QRect(1162, 1436, 721, 382),
+            #                '3': QRect(335, 2066, 52, 216), '4': QRect(660, 2007, 186, 414), 
+            #                '5': QRect(974, 2018, 73, 176), '6': QRect(1029, 2012, 125, 361),
+            #                 '7': QRect(1558, 1925, 122, 315), '9': QRect(1726, 2273, 112, 454), 
+            #                 '10': QRect(1145, 2664, 50, 30), '11': QRect(1181,663, 80, 164),
+            #                  '12': QRect(906, 2564, 46, 94)}}  
+              
             # print(type(finalRecpos))
             # print(finalRecpos)
                 # self.cnt += self.portions
@@ -122,7 +124,7 @@ class TranslateNew(QRunnable):
                 self.cnt += self.portions
                 backup.append((x, gotten_text, finalTextcopy))
                 self.signals.progress.emit(self.cnt)
-                """
+            """
         except:
             logger.exception("ERROR")
             self.signals.finished.emit()
