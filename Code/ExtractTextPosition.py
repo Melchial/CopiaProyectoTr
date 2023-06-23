@@ -18,15 +18,15 @@ class Worker(QObject):
     
     textPos = pyqtSignal(object)
 
-class TranslateNew(QRunnable):
+class ExtractTextPosi(QRunnable):
     
-    def __init__(self, img,mocr, translator,language, combN=False, combO=False, sliderNum=0):
-        super(TranslateNew, self).__init__()
+    def __init__(self, img,mocr, combN=False, combO=False, sliderNum=2):
+        super(ExtractTextPosi, self).__init__()
         self.imag1 = img
         self.setting = Settings()
         self.manga = MangaBag()
         self.handling = FileHandler()
-        self.name = translator
+        # self.name = translator
         self.shouldCombN = combN
         self.shouldCombO = combO
         self.range = sliderNum * self.manga.getRatio(self.imag1[0]) + 4
@@ -35,17 +35,26 @@ class TranslateNew(QRunnable):
         self.portions = (100 / len(self.imag1))/3
         self.cnt = 0
         self.mocr = mocr
-        self.source = None if language == "auto" else language
+        # self.source = None if language == "auto" else language
         self.ratio = 1
 
     
     def LocateText(self, image):
         myDict = self.manga.get_text(image)
+        # print(myDict)
+        # print(self.shouldCombN)
+        # print(self.shouldCombO)
         if self.shouldCombN and self.shouldCombO:
+            # print(myDict)
             bound1 = rectanglesCO(myDict, "c")
+            # print(bound1)
+            print(self.range)
             bound2 = combine_rectangles(bound1, self.range)
+            # print(bound2)
             overlap1 = rectanglesCO(bound2, "o")
+            # print(overlap1)
             overlap = combine_overlapping_rectangles(overlap1)
+            # print(overlap)
             return overlap
         elif self.shouldCombN and not(self.shouldCombO):
             bound3 = rectanglesCO(myDict, "c")
@@ -82,49 +91,7 @@ class TranslateNew(QRunnable):
                     finalsq[i]=QRect(x1,y1).normalized()
                 finalRecpos[x]=finalsq
 
-            # finalRecpos={'C:/Users/zeraf/Documents/ProjectMangaTr/CopiaProyectoTr/007.jpg': 
-            #              {'0': QRect(1486, 423, 130, 407), '1': QRect(1162, 1436, 721, 382),
-            #                '3': QRect(335, 2066, 52, 216), '4': QRect(660, 2007, 186, 414), 
-            #                '5': QRect(974, 2018, 73, 176), '6': QRect(1029, 2012, 125, 361),
-            #                 '7': QRect(1558, 1925, 122, 315), '9': QRect(1726, 2273, 112, 454), 
-            #                 '10': QRect(1145, 2664, 50, 30), '11': QRect(1181,663, 80, 164),
-            #                  '12': QRect(906, 2564, 46, 94)}}  
-              
-            # print(type(finalRecpos))
-            # print(finalRecpos)
-                # self.cnt += self.portions
-                # self.signals.progress.emit(self.cnt)
-
-                
-                # finalText = self.manga.get_japanese(self.image, self.mocr, gotten_text, self.directory)
-                # self.cnt += self.portions
-                # self.signals.progress.emit(self.cnt)
-                # finalTextcopy = finalText.copy()
-                # pprint(finalText)
-            """
-                #find the language on the first final text value
-                if self.source == None and finalText != {}:
-                    for y in list(finalText.values()):
-                        if y != []:
-                            self.source = langid.classify(y[0])[0]
-                            break
-                #
-                
-                newList = self.manga.translate(finalText, self.name, self.source)
-                self.cnt += self.portions
-                self.signals.progress.emit(self.cnt)
-                # pprint(newList)
-                addNewLine1 = self.manga.addNewLine(x, newList, gotten_text, cv2.FONT_HERSHEY_DUPLEX, fontSize, thickness)
-                
-
-                final = self.manga.write(self.image, gotten_text, addNewLine1, fontSize, thickness)
-                myarray = np.array(final)
-                image = qimage2ndarray.array2qimage(myarray)
-                finalImg.append(image)
-                self.cnt += self.portions
-                backup.append((x, gotten_text, finalTextcopy))
-                self.signals.progress.emit(self.cnt)
-            """
+            
         except:
             logger.exception("ERROR")
             self.signals.finished.emit()

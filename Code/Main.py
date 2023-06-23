@@ -3,23 +3,20 @@ from PyQt5.QtWidgets import QFileDialog, QShortcut
 from PyQt5.QtGui import QPixmap
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPixmap, QColor, QTextOption, QFont, QPen
-from PyQt5.QtCore import QThreadPool, pyqtSignal, Qt, QPoint, QPropertyAnimation, QEventLoop
+from PyQt5.QtCore import QThreadPool, pyqtSignal, Qt, QPoint, QPropertyAnimation, QEventLoop, QRectF
 
 from darkmode import Ui_MainWindow
 from settingsGUI import Ui_Form
 
 from loguru import logger
-
 from Canvas import Image
-
 from Configer import Settings
-
-from TransalateNew import TranslateNew
-
+from ExtractTextPosition import ExtractTextPosi
 from ExtText import ExtractOriginal
-
 from manga_ocr import MangaOcr
-
+from textTranslate import TranslateOrig
+from resumeData import ResumeData
+import copy
 class interact(QtWidgets.QMainWindow, Ui_MainWindow):
     active = pyqtSignal()
 
@@ -41,6 +38,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         self.files = []
         self.textPosi = {}
         self.textOri = {}
+        self.textTransalated = {}
         self.isClicked = False
         self.shownSetting = False
         self.bar.setValue(0)
@@ -49,7 +47,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bar.setVisible(False)
         self.bar.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.fontsize.setMaximum(15)
-        self.translator = "DeepL"
+        self.translator = "Google"
         self.translateOptions.setCurrentIndex(2)
         self.range = 0
         self.combineN = False
@@ -133,7 +131,14 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.newtrans1.clicked.connect(self.extractTextPos)
         self.newtrans2.clicked.connect(self.extractTextOri)
-        self.newtrans3.clicked.connect(self.showdataTests)
+        self.newtrans3.clicked.connect(self.transalteTextOri)
+        self.newtrans4.clicked.connect(self.loadResumeData)
+        self.newtrans5.clicked.connect(self.actimTextTrans)
+        # self.newtrans5.clicked.connect(self.actText)
+        self.newtrans6.clicked.connect(self.showdataTests)
+
+        self.im.signals.signal1.connect(self.actTextOrig)
+        self.selectButton.clicked.connect(self.startSelect)
         # self.newtrans3.clicked.connect(self.showdataTests)
 
         self.pushButton_5.clicked.connect(self.showSet)
@@ -154,12 +159,14 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         self.automaticButton.clicked.connect(self.changeToAutomatic)
         self.sortButton.stateChanged.connect(self.sortFile)
         self.removeRect.stateChanged.connect(self.removeRectangle)
+        self.removeTTrans.stateChanged.connect(self.removeTextTransalted)
         self.pushButton_2.clicked.connect(self.showSearch)
         self.undoButton.clicked.connect(self.undo)
         self.redoButton.clicked.connect(self.redo)
         self.eraseButton.clicked.connect(self.startErase)
         self.menu.clicked.connect(self.showMenu)
         self.languages.currentTextChanged.connect(self.langOption)
+
         
     #define el estilo la barra de progreso al parecer
     def stylesheet1(self):
@@ -369,6 +376,14 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
             self.im.rect = False
         else:
             self.im.rect = True
+        self.im.update()
+
+    def removeTextTransalted(self, n):
+        if n:
+            self.im.tTransalt = False
+        else:
+            self.im.tTransalt = True
+        self.im.update()
 
     def changeTrans(self, n):
         if n != None or n != []:
@@ -406,6 +421,34 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
             self.shownWidget = False
         else:
             self.shownWidget = True
+    
+    def startSelect(self):
+        if self.im.select:
+            self.im.select = False
+            self.selectButton.setStyleSheet("QPushButton{\n"
+                                            "border:none;\n"
+                                            "width:150px;\n"
+                                            "height:50px;\n"
+                                            "border-radius:5px;\n"
+                                            "}\n"
+                                            "QPushButton:hover:!pressed{\n"
+                                            "border:1px solid rgb(170, 0, 255);\n"
+                                            "}\n"
+                                            "\n"
+                                            "")
+        else:
+            self.im.select = True
+            self.selectButton.setStyleSheet("QPushButton{\n"
+                                            "width:150px;\n"
+                                            "height:50px;\n"
+                                            "border-radius:5px;\n"
+                                            "border:2px solid rgb(170, 0, 255);\n"
+                                            "}\n"
+                                            "QPushButton:hover:!pressed{\n"
+                                            "border:1px solid rgb(170, 0, 255);\n"
+                                            "}\n"
+                                            "\n"
+                                            "")
 
     def startErase(self):
         if self.im.erase:
@@ -574,6 +617,8 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.newIndex = 0
 
     def saveImages(self):
+        print(self.translatedFiles)
+        print(self.im.flag)
         if self.translatedFiles == [] and not self.im.flag:
             pass
         elif self.translatedFiles != [] and not self.im.flag:
@@ -588,6 +633,50 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
                 num += 1
             # with open((filename[0]+".pdf"), "wb") as f:
             #     f.write(img2pdf.convert(imgDirectory))
+        elif self.translatedFiles == {} and  self.im.flag:
+            filename = QFileDialog.getSaveFileName(self, 'Save File')
+            imgDirectory = []
+            pageCopy = self.textTransalated
+            nums = 0
+            for img in self.files:
+                try:
+                    num = 0
+                    pix = QPixmap(img)
+                    qp = QtGui.QPainter(pix)
+                    qp.setPen(QPen(self.im.color[self.im.textColor], 2, Qt.SolidLine))
+                    qp.drawPixmap(pix.rect(), pix)
+                    
+                    for f in self.im.pages[img]:
+                        rect = copy.deepcopy(self.im.pages[img][f])
+                        words = self.textTransalated[img][f]
+                        if self.im.rect and rect!={}:
+                            qp.drawRects(rect)
+                    
+                        # for index, words in enumerate(self.textTransalated[self.im.connectDict[img]]):
+                            if self.im.bg != "None":
+                                qp.fillRect(rect, self.im.color[self.im.bg])
+                            print (self.im.factX)
+                            print (self.im.fontNum )
+                            print (int(self.im.fontNum /self.im.factX))
+                            qp.setFont(QFont("Comic Sans MS",int(self.im.fontNum/self.im.factX )))
+
+
+                            option = QTextOption()
+                            option.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+                            rect.setHeight(int(rect.height()*1.4))
+
+                            qp.drawText(QRectF(rect), words, option)
+
+                    imName = f"Translated\Truetrans{nums}.jpg"
+                    imgDirectory.append(imName)
+                    pix.save(imName)
+                    nums += 1
+                    qp.end()
+                except:
+                    logger.exception("Something went wrong!")
+            # with open((filename[0]+".pdf"), "wb") as f:
+            #     f.write(img2pdf.convert(imgDirectory))
+        
         else:
             filename = QFileDialog.getSaveFileName(self, 'Save File')
             imgDirectory = []
@@ -609,7 +698,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
                         option = QTextOption()
                         option.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                         qp.drawText(self.im.scaledDict[img][index], words, option)
-                    imName = f"Translated\Truetrans{nums}.jpg"
+                    imName = f"Translated\{nums}.jpg"
                     imgDirectory.append(imName)
                     pix.save(imName)
                     nums += 1
@@ -646,6 +735,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.index -= 1
         if self.files != []:
+            print('actimg')
             self.showImage()
             self.drawOnPages()
 
@@ -656,6 +746,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
                 if img not in self.im.pages: #valida  si la imagen esta entre las paginas que esten cargadas
                     self.im.pages[img] = [] #si no estan  el pages con indice img se hace null
             currentP = self.files[self.index] #se alinea el valor del current p con la lista de archivos y la pagina actual
+            print(currentP)
             self.im.img = currentP # se hace el img la pagina actual
 
     @logger.catch
@@ -667,9 +758,13 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
             self.im.setPixmap(pix)
         elif self.isClicked and self.im.flag:
             self.drawOnPages()
+            print(self.index)
             im = self.files[self.index]
+            # print(im)
             pix = QPixmap(im)
             self.im.image = pix
+            self.im.setPixmap(pix)
+
             self.im.refactor()
             self.im.actContCuad()
             self.im.update()
@@ -739,8 +834,10 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         # for f in self.textPosi:
         #     print(type(f))
         #     print(f)
-        print(self.im.pages)  
+        print(self.im.pages) 
+        print(self.im.pagesRect)  
         print(self.textOri) 
+        print(self.textTransalated) 
 
     #almacenamos los datos de la posicion del texto
     def positionText(self,textpos):
@@ -750,6 +847,48 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def textoOriginal(self, textOr ):
         self.textOri = textOr
+
+    def loadResumeData(self):
+        self.changeToManual()
+        rData = ResumeData()
+        self.im.pages= copy.deepcopy(rData.impages)
+        self.im.pagesRect= copy.deepcopy(rData.imPagesRect)
+        self.textOri= copy.deepcopy(rData.textOri)
+        
+        self.textTransalated= copy.deepcopy(rData.textTranslated)
+        self.im.textTranslated = copy.deepcopy(rData.textTranslated)
+
+        self.afterThread([])
+
+    def actTextOrig(self, textOrig):
+        if self.textOri != {}:
+            textJ=''
+            textT=''
+
+            # print(self.textOri)
+            # print(self.textTransalated)
+            # print(textOrig)
+
+            if  textOrig != []:
+                textJ= self.textOri[textOrig[0][0]][textOrig[0][1]]
+                if self.textTransalated != {}:
+                    textT= self.textTransalated[textOrig[0][0]][textOrig[0][1]]
+            self.textBox_1.setText(textJ)
+            self.textBox_2.setText(textT)
+
+
+    def actTextTransalted (self, textTransalted):
+        if textTransalted != {}:
+            # textT = {}
+            self.textTransalated = textTransalted
+            self.im.textTranslated = textTransalted
+            self.im.update()
+
+    def actimTextTrans (self):
+        print(str(self.textBox_2.toPlainText()))
+        print(self.im.partSelect)
+        self.textTransalated[self.im.img][self.im.partSelect]=str(self.textBox_2.toPlainText())
+        self.im.textTranslated[self.im.img][self.im.partSelect]=str(self.textBox_2.toPlainText())
 
     def translate1(self):
         self.clearButton.hide()
@@ -802,7 +941,7 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
              logger.info("Find Text Position")
              self.changeToManual()
-             self.worker = TranslateNew(self.files,self.ocr,self.combineN,self.combineO,self.range)
+             self.worker = ExtractTextPosi(self.files,self.ocr,True,True)
              self.worker.signals.result.connect(self.afterThread)
              self.worker.signals.textPos.connect(self.positionText)
                       
@@ -810,16 +949,32 @@ class interact(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def extractTextOri(self):
         self.clearButton.hide()
-        if self.files == []:
+        if self.im.pages == []:
             pass
         else:
              logger.info("Find Text Ori")
+             
+
              self.changeToManual()
              self.worker = ExtractOriginal(self.files,self.ocr,self.im.pages,self.originalLang)
              self.worker.signals.result.connect(self.afterThread)
              self.worker.signals.textOriginal.connect(self.textoOriginal)
                       
              self.thread.start(self.worker)
+    
+    def transalteTextOri(self):
+        self.clearButton.hide()
+        if self.textOri == []:
+            pass
+        else:
+             logger.info("Translate Text Ori")
+             self.changeToManual()
+             self.worker = TranslateOrig(self.files,self.textOri,self.translator,self.originalLang)
+             self.worker.signals.result.connect(self.afterThread)
+             self.worker.signals.textTransalted.connect(self.actTextTransalted)
+                      
+             self.thread.start(self.worker)
+    
 
 if __name__ == "__main__":
     import sys

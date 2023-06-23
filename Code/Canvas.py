@@ -1,10 +1,13 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QObject
 from PyQt5.QtCore import Qt, QPoint, QRect, QRectF, pyqtSignal
 from PyQt5.QtGui import QPainter, QPen, QPixmap, QColor, QTextOption, QFont, QCursor
 from loguru import logger
 import decimal
 import copy
+
+class Worker(QObject):
+    signal1 = pyqtSignal(object)
 
 class Image(QtWidgets.QLabel):
 
@@ -16,11 +19,13 @@ class Image(QtWidgets.QLabel):
         self.begin = QPoint()
         self.end = QPoint()
         self.flag = False
+        
         self.pages = {}
         self.pagesRect = {}
         self.connectDict = {}
         self.translated = {}
         self.japanese = {}
+        self.textTranslated = {}
         self.color = {
             "White" : QColor(255, 255, 255),
             "Black" : QColor(0, 0, 0),
@@ -30,14 +35,18 @@ class Image(QtWidgets.QLabel):
         }
         self.bg = "White"
         self.textColor = "Red"
-        self.fontNum = 6
+        self.fontNum = 7
         self.rect = True
+        self.tTransalt = True   
         self.scaledDict = {}
         self.erase = False
+        self.select = False
         self.nContCuad = 0
         self.isPressed = False
         self.factX = 1
         self.factX = 1
+        self.signals = Worker()
+        self.partSelect = None
 
     def actContCuad(self):
         ov = []
@@ -109,7 +118,7 @@ class Image(QtWidgets.QLabel):
     @logger.catch
     def paintEvent(self, event):
         super().paintEvent(event)
-        print("paint event")
+        # print("paint event")
         # print(self.pages)
         # print(self.pagesRect)
         if self.flag and self.img != None:
@@ -145,6 +154,22 @@ class Image(QtWidgets.QLabel):
                     option = QTextOption()
                     option.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                     qp.drawText(QRectF(a, b, c, d), words, option)
+            
+            if self.tTransalt:
+                if self.textTranslated and self.translated == {}:
+                    for f in self.textTranslated[self.img]:
+                        # a, b, c, d, = self.pages[self.img][f].getRect()
+                        rect = copy.deepcopy(self.pagesRect[self.img][f])
+                        words = self.textTranslated[self.img][f]
+                        if self.bg != "None":
+                            qp.fillRect(QRectF(rect), self.color[self.bg])
+                        qp.setFont(QFont("Comic Sans MS",self.fontNum));
+                        option = QTextOption()
+                        option.setAlignment(Qt.AlignHCenter | Qt.AlignTop )
+                        option.setWrapMode(QTextOption.WrapAtWordBoundaryOrAnywhere)
+
+                        rect.setHeight(int(rect.height()*1.4))
+                        qp.drawText(QRectF(rect),words, option)
 
             if not self.begin.isNull() and not self.end.isNull():
                 # a=1
@@ -158,10 +183,26 @@ class Image(QtWidgets.QLabel):
             self.isPressed=True
             if self.erase:
                 self.changeCursor()
+            elif self.select:          
+                endpoint = event.pos()
+                self.update()
+                nL = []
+                p1 = endpoint.x()
+                p2 = endpoint.y() 
+                if self.pages[self.img] != []:
+                    for index in self.pages[self.img]:
+                        x, y, w, h = self.rectFactor(self.pages[self.img][index]).getRect()
+                        if p1 >= x and p1 <= x+w and p2 >= y and p2 <= y+h:
+                            nL.append((self.img, index))
+                    if nL != []:
+                        print(nL)
+                        self.partSelect = nL[0][1]
+                        self.signals.signal1.emit(nL)
             else:
                 self.setCursor(QCursor(Qt.ArrowCursor))
                 self.begin = self.end = event.pos()
                 self.update()
+                    
         super().mousePressEvent(event)
             # print(type(self.pages[self.img]))
             # print(self.pages[self.img])
@@ -176,15 +217,15 @@ class Image(QtWidgets.QLabel):
     @logger.catch
     def mouseMoveEvent(self, event):
         if self.flag and self.img != None:
-            if self.erase:
+            if self.erase or self.select:
                 self.changeCursor()
                 self.end = event.pos()
                 self.update()
                 nL = []
                 p1 = self.end.x()
                 p2 = self.end.y()
-                print(p1)
-                print(p2)
+                # print(p1)
+                # print(p2)
                 if self.pages[self.img] != []:
                     # for index, rect in enumerate(self.pages[self.img]):
                     #     x, y, w, h = rect.getRect()
@@ -194,12 +235,15 @@ class Image(QtWidgets.QLabel):
                         x, y, w, h = self.rectFactor(self.pages[self.img][index]).getRect()
                         if p1 >= x and p1 <= x+w and p2 >= y and p2 <= y+h:
                             nL.append((self.img, index))
-                    
-                    for img, index in nL:
-                        print(index)
-                        del self.pages[img][index]
-                        self.refactor()
-                    self.actContCuad()
+                    if self.erase:
+                        for img, index in nL:
+                            # print(index)
+                            del self.pages[img][index]
+                            self.refactor()
+                        self.actContCuad()
+                    # if self.select:
+                    #     print(nL)
+                    #     self.signals.signal1.emit(nL)
             else:
                 self.setCursor(QCursor(Qt.ArrowCursor))
                 self.end = event.pos()
@@ -211,13 +255,15 @@ class Image(QtWidgets.QLabel):
             
             if self.erase:
                 self.changeCursor()
+            elif self.select:
+                print('select')
             else:
                 self.setCursor(QCursor(Qt.ArrowCursor))
                 r = QRect(self.begin, self.end).normalized()
                 # self.pages[self.img].append(r) #se modifica a una dict en lugar de una lista
                 
                 self.nContCuad +=1
-                self.pages[self.img][f"{self.nContCuad}"]=self.rectFactor( QRect(self.begin,self.end) ,True)
+                self.pages[self.img][f"{self.nContCuad}"]=self.rectFactor( QRect(self.begin,self.end).normalized() ,True)
                 self.begin = self.end = QPoint()
                 self.refactor()
                 self.update()

@@ -44,8 +44,8 @@ class Ui_MainWindow(object):
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.header = QtWidgets.QFrame(self.centralwidget)
-        self.header.setMinimumSize(QtCore.QSize(0, 50))
-        self.header.setMaximumSize(QtCore.QSize(16777215, 50))
+        self.header.setMinimumSize(QtCore.QSize(0, 20))
+        self.header.setMaximumSize(QtCore.QSize(16777215, 20))
         self.header.setStyleSheet("")
         self.header.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.header.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -339,6 +339,12 @@ class Ui_MainWindow(object):
         self.removeRect.setFont(font)
         self.removeRect.setObjectName("removeRect")
         self.manualSet.addWidget(self.removeRect)
+        self.removeTTrans = QtWidgets.QCheckBox(self.ManualWidget)
+        font = QtGui.QFont()
+        font.setFamily("Comic Sans MS")
+        self.removeTTrans.setFont(font)
+        self.removeTTrans.setObjectName("removeTTrans")
+        self.manualSet.addWidget(self.removeTTrans)
         self.verticalLayout_7.addLayout(self.manualSet)
         self.verticalLayout_2.addWidget(self.ManualWidget)
         self.pushButton_5 = QtWidgets.QPushButton(self.side_menu)
@@ -547,6 +553,29 @@ class Ui_MainWindow(object):
         self.eraseButton.setIconSize(QtCore.QSize(20, 20))
         self.eraseButton.setObjectName("eraseButton")
         self.horizontalLayout_7.addWidget(self.eraseButton)
+
+        self.selectButton = QtWidgets.QPushButton(self.editRect)
+        self.selectButton.setMinimumSize(QtCore.QSize(20, 20))
+        self.selectButton.setMaximumSize(QtCore.QSize(40, 16777215))
+        self.selectButton.setStyleSheet("QPushButton{\n"
+"border:none;\n"
+"width:20px;\n"
+"height:20px;\n"
+"border-radius:5px;\n"
+"}\n"
+"QPushButton:hover:!pressed{\n"
+"border:1px solid rgb(170, 0, 255);\n"
+"}\n"
+"\n"
+"")
+        self.selectButton.setText("")
+        icon9 = QtGui.QIcon()
+        icon9.addPixmap(QtGui.QPixmap(":/newPrefix/select.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.selectButton.setIcon(icon9)
+        self.selectButton.setIconSize(QtCore.QSize(20, 20))
+        self.selectButton.setObjectName("selectButton")
+        self.horizontalLayout_7.addWidget(self.selectButton)
+
         self.redoButton = QtWidgets.QPushButton(self.editRect)
         self.redoButton.setMinimumSize(QtCore.QSize(20, 20))
         self.redoButton.setMaximumSize(QtCore.QSize(25, 16777215))
@@ -765,6 +794,72 @@ class Ui_MainWindow(object):
 "}")
         self.newtrans3.setObjectName("newtrans3")
         self.actionButtons.addWidget(self.newtrans3)
+        self.newtrans4 = QtWidgets.QPushButton(self.main_body)
+        self.newtrans4.setMaximumSize(QtCore.QSize(130, 45))
+        font = QtGui.QFont()
+        font.setFamily("Comic Sans MS")
+        font.setPointSize(10)
+        self.newtrans4.setFont(font)
+        self.newtrans4.setStyleSheet("QPushButton{\n"
+"height:20;\n"
+"width: 30;\n"
+"border-radius: 7px;\n"
+"padding: 5px;\n"
+"background-color: #040f13;\n"
+"}\n"
+"QPushButton:hover:!pressed\n"
+"{\n"
+"background-color: QLinearGradient( x1: 0, y1: 0,\n"
+"                             x2: 1, y2: 0, \n"
+"                          stop: 0 #c471f5, \n"
+"                          stop: 1 #fa71cd );\n"
+"}")
+        self.newtrans4.setObjectName("newtrans4")
+        self.actionButtons.addWidget(self.newtrans4)
+        self.newtrans5 = QtWidgets.QPushButton(self.main_body)
+        self.newtrans5.setMaximumSize(QtCore.QSize(130, 45))
+        font = QtGui.QFont()
+        font.setFamily("Comic Sans MS")
+        font.setPointSize(10)
+        self.newtrans5.setFont(font)
+        self.newtrans5.setStyleSheet("QPushButton{\n"
+"height:20;\n"
+"width: 30;\n"
+"border-radius: 7px;\n"
+"padding: 5px;\n"
+"background-color: #040f13;\n"
+"}\n"
+"QPushButton:hover:!pressed\n"
+"{\n"
+"background-color: QLinearGradient( x1: 0, y1: 0,\n"
+"                             x2: 1, y2: 0, \n"
+"                          stop: 0 #c471f5, \n"
+"                          stop: 1 #fa71cd );\n"
+"}")
+        self.newtrans5.setObjectName("newtrans5")
+        self.actionButtons.addWidget(self.newtrans5)
+        self.newtrans6 = QtWidgets.QPushButton(self.main_body)
+        self.newtrans6.setMaximumSize(QtCore.QSize(130, 45))
+        font = QtGui.QFont()
+        font.setFamily("Comic Sans MS")
+        font.setPointSize(10)
+        self.newtrans6.setFont(font)
+        self.newtrans6.setStyleSheet("QPushButton{\n"
+"height:20;\n"
+"width: 30;\n"
+"border-radius: 7px;\n"
+"padding: 5px;\n"
+"background-color: #040f13;\n"
+"}\n"
+"QPushButton:hover:!pressed\n"
+"{\n"
+"background-color: QLinearGradient( x1: 0, y1: 0,\n"
+"                             x2: 1, y2: 0, \n"
+"                          stop: 0 #c471f5, \n"
+"                          stop: 1 #fa71cd );\n"
+"}")
+        self.newtrans6.setObjectName("newtrans6")
+        self.actionButtons.addWidget(self.newtrans6)
         self.saveButton = QtWidgets.QPushButton(self.main_body)
         self.saveButton.setMaximumSize(QtCore.QSize(130, 45))
         font = QtGui.QFont()
@@ -815,7 +910,33 @@ class Ui_MainWindow(object):
         self.actionButtons.setStretch(2, 1)
         self.actionButtons.setStretch(3, 1)
         self.actionButtons.setStretch(4, 1)
+        self.actionButtons.setStretch(5, 1)
+        self.actionButtons.setStretch(6, 1)
+        self.actionButtons.setStretch(7, 1)
+        self.actionButtons.setStretch(8, 1)
+        self.actionButtons.setStretch(9, 1)
+
+        self.verticalLayout_11 = QtWidgets.QVBoxLayout()
+        # self.verticalLayout_11.setSpacing(10)
+        self.verticalLayout_11.setObjectName("verticalLayout_11")
+        # self.verticalLayout_11.addWidget(self.bar, 0, QtCore.Qt.AlignHCenter)
+        self.textBox_1 = QtWidgets.QTextEdit(self.main_body)
+        self.textBox_1.setMaximumSize(QtCore.QSize(1200, 60))
+        self.textBox_1.setObjectName("textBox_1")
+        spacerItem5 = QtWidgets.QSpacerItem(3, 3, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.verticalLayout_11.addItem(spacerItem5)
+        self.verticalLayout_11.addWidget(self.textBox_1)
+        spacerItem6 = QtWidgets.QSpacerItem(3, 3, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.verticalLayout_11.addItem(spacerItem6)
+        self.textBox_2 = QtWidgets.QTextEdit(self.main_body)
+        self.textBox_2.setMaximumSize(QtCore.QSize(1200, 60))
+        self.textBox_2.setObjectName("textBox_2")
+        self.verticalLayout_11.addWidget(self.textBox_2)
+
         self.verticalLayout_4.addLayout(self.actionButtons)
+
+        self.verticalLayout_4.addLayout(self.verticalLayout_11)
+
         self.verticalLayout_5.addLayout(self.verticalLayout_4)
         self.horizontalLayout.addWidget(self.main_body)
         self.verticalLayout.addWidget(self.frame_2)
@@ -849,7 +970,8 @@ class Ui_MainWindow(object):
         self.bGcolor.setItemText(3, _translate("MainWindow", "Green"))
         self.bGcolor.setItemText(4, _translate("MainWindow", "Black"))
         self.label_4.setText(_translate("MainWindow", "Font Size: 6"))
-        self.removeRect.setText(_translate("MainWindow", "Remove rectangles"))
+        self.removeRect.setText(_translate("MainWindow", "Remove rectangles")) 
+        self.removeTTrans.setText(_translate("MainWindow", "Remove textTransalt"))
         self.sortButton.setText(_translate("MainWindow", "Sort pages by file name"))
         self.label.setText(_translate("MainWindow", "Translators:"))
         self.translateOptions.setItemText(0, _translate("MainWindow", "Bing"))
@@ -863,9 +985,12 @@ class Ui_MainWindow(object):
         self.advanced.setText(_translate("MainWindow", "Advanced Option"))
         self.upload.setText(_translate("MainWindow", "Upload"))
         self.translate.setText(_translate("MainWindow", "Translate"))
-        self.newtrans1.setText(_translate("MainWindow", "nTrans1"))
-        self.newtrans2.setText(_translate("MainWindow", "nTrans2"))
-        self.newtrans3.setText(_translate("MainWindow", "nTrans3"))
+        self.newtrans1.setText(_translate("MainWindow", "textPos"))
+        self.newtrans2.setText(_translate("MainWindow", "extText"))
+        self.newtrans3.setText(_translate("MainWindow", "tranTex"))
+        self.newtrans4.setText(_translate("MainWindow", "cargaDat"))
+        self.newtrans5.setText(_translate("MainWindow", "EditText"))
+        self.newtrans6.setText(_translate("MainWindow", "showDat"))
         self.saveButton.setText(_translate("MainWindow", "Save"))
         self.clearButton.setText(_translate("MainWindow", "Clear"))
 import darkmode_rc

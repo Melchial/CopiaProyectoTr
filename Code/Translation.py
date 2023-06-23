@@ -123,10 +123,10 @@ class MangaBag:
 
         return myDict
     
-    def translate(self, original, name, langauge):
+    def translate(self, original, name, language):
         if original == {}:
             return {}
-        source = langauge
+        source = language
         if name == "DeepL":
             for key in original:
                 original[key] = deepl.translate(source_language="JA", target_language="EN", text=original[key])

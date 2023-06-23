@@ -15,7 +15,7 @@ class Overlap:
         y1 = min(self.y1, other.y1)
         x2 = max(self.x2, other.x2)
         y2 = max(self.y2, other.y2)
-        id = self.id + "-" + other.id
+        id = self.id #+ "-" + other.id
         return Overlap(x1, y1, x2, y2, id)
     
     def is_overlap(self, other):
@@ -48,16 +48,21 @@ class Combine:
         self.id = id
 
     def distance_to(self, other):
-        x_distance = abs(self.x1 - other.x1)
-        y_distance = abs(self.y1 - other.y1)
-        return math.sqrt(x_distance**2 + y_distance**2)
+        x1_distance = abs(self.x2 - other.x1)
+        y1_distance = abs(self.y1 - other.y1)
+        x2_distance = abs(self.x1 - other.x2)
+        y2_distance = abs(self.y1 - other.y1)
+
+        distance= min(math.sqrt(x1_distance**2 + y1_distance**2), math.sqrt(x2_distance**2 + y2_distance**2))
+
+        return math.sqrt(distance)
 
     def combine(self, other):
         x1 = min(self.x1, other.x1)
         y1 = min(self.y1, other.y1)
         x2 = max(self.x2, other.x2)
         y2 = max(self.y2, other.y2)
-        id = self.id + "-" + other.id
+        id = self.id #+ "-" + other.id
         return Combine(x1, y1, x2, y2, id)
 
 def combine_rectangles(rectangles, distance_threshold):
