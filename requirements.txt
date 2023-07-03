@@ -58,7 +58,7 @@ PyQt5-Qt5==5.15.2
 PyQt5-sip==12.11.0
 python-bidi==0.4.2
 python-dateutil==2.8.2
-PyThorch ==2.0.1
+# PyThorch #==2.0.1
 PyWavelets==1.4.1
 pywin32-ctypes==0.2.0
 PyYAML==6.0
