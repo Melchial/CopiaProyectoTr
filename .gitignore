@@ -1,0 +1,14 @@
+__pycache__/
+Code/__pycache__/addText.cpython-310.pyc
+Code/__pycache__/Canvas.cpython-310.pyc
+Code/__pycache__/Configer.cpython-310.pyc
+Code/__pycache__/darkmode_rc.cpython-310.pyc
+Code/__pycache__/darkmode.cpython-310.pyc
+Code/__pycache__/ExtractTextPosition.cpython-310.pyc
+Code/__pycache__/ExtText.cpython-310.pyc
+Code/__pycache__/FileHandling.cpython-310.pyc
+Code/__pycache__/RectangleManipulation.cpython-310.pyc
+Code/__pycache__/resumeData.cpython-310.pyc
+Code/__pycache__/settingsGUI.cpython-310.pyc
+Code/__pycache__/textTranslate.cpython-310.pyc
+Code/__pycache__/Translation.cpython-310.pyc
